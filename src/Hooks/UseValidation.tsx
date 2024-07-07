@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { validationRules, ValidationRule } from "../utils/ValidationRules";
 
 interface FormData {
   [key: string]: any;
@@ -14,33 +15,41 @@ const convertToString = (value: any) => {
   }
 };
 
-interface ValidationRule {
-  field: string;
-  validate: (value: any) => boolean;
-  errorMessage: string;
-}
-
 const useValidation = (
   formData: FormData,
   validationRules: ValidationRule[],
 ) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  const validate = () => {
+  useEffect(() => {
     const newErrors: Record<string, string> = {};
-
     validationRules.forEach(({ field, validate, errorMessage }) => {
       const value = convertToString(formData[field]);
       if (!validate(value)) {
         newErrors[field] = errorMessage;
       }
     });
+    setErrors(newErrors);
+  }, [formData, validationRules]);
 
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    validationRules.forEach(({ field, validate, errorMessage }) => {
+      const value = convertToString(formData[field]);
+      if (!validate(value)) {
+        newErrors[field] = errorMessage;
+      }
+    });
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  return [errors, validate] as const;
+  const markTouched = (field: string) => {
+    setTouched((prevTouched) => ({ ...prevTouched, [field]: true }));
+  };
+
+  return [errors, validate, markTouched, touched] as const;
 };
 
 export default useValidation;

@@ -1,23 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { UserData } from "../utils/types";
 
-interface UserData {
-  firstName: string;
-  lastName?: string;
-  email?: string;
-  city?: string;
-  phone?: string[] | null;
-}
-
-const useFormState = (initialData: UserData) => {
-  const [formData, setFormData] = useState<UserData>(initialData);
+const useFormState = (initialState: UserData) => {
+  const [formState, setFormState] = useState<UserData>(initialState);
+  const prevInitialStateRef = useRef<UserData>(initialState);
 
   useEffect(() => {
-    if (initialData) {
-      setFormData(initialData);
+    if (
+      JSON.stringify(prevInitialStateRef.current) !==
+      JSON.stringify(initialState)
+    ) {
+      setFormState(initialState);
+      prevInitialStateRef.current = initialState;
     }
-  }, [initialData]);
+  }, [initialState]);
 
-  return [formData, setFormData] as const;
+  return [formState, setFormState] as const;
 };
 
 export default useFormState;

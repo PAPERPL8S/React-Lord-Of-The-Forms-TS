@@ -1,46 +1,42 @@
-import { UserInformation } from "./types";
+import React from "react";
+import {
+  capitalize,
+  ensureArray,
+  formatPhoneNumber,
+} from "./utils/transformations";
+import { UserData } from "./utils/types";
 
-export const InfoRow = ({ label, value }: { label: string; value: string }) => {
+interface ProfileInformationProps {
+  userData: UserData | null;
+  submitted: boolean;
+}
+
+const ProfileInformation: React.FC<ProfileInformationProps> = ({
+  userData,
+  submitted,
+}) => {
+  if (!submitted || !userData) {
+    return (
+      <div className="no-info">
+        <p>No information provided</p>
+      </div>
+    );
+  }
+
+  const phoneArray = ensureArray(userData.phone);
+  const phoneString = phoneArray.join("");
+  const formattedPhone = formatPhoneNumber(phoneString);
+
   return (
-    <div>
-      <span style={{ marginRight: 5 }}>
-        <b>{label}:</b>
-      </span>
-      <span>{value}</span>
+    <div className="profile-info-container">
+      <h3 className="profile-info-title">Your Submitted User Information</h3>
+      <p>First Name: {capitalize(userData.firstName)}</p>
+      <p>Last Name: {capitalize(userData.lastName ?? "")}</p>
+      <p>Email: {userData.email}</p>
+      <p>City: {capitalize(userData.city)}</p>
+      <p>Phone: {formattedPhone}</p>
     </div>
   );
 };
-export const ProfileInformation = ({
-  userData,
-}: {
-  userData: UserInformation | null;
-}) => {
-  if (!userData) {
-    return (
-      <>
-        <u>
-          <h3>Your Submitted User Information</h3>
-        </u>
-        <div className="user-info">
-          <div>No information provided</div>
-        </div>
-      </>
-    );
-  }
-  const { email, firstName, lastName, phone, city } = userData;
-  return (
-    <>
-      <u>
-        <h3>Your Submitted User Information</h3>
-      </u>
-      <div className="user-info">
-        <InfoRow label="Email" value={email} />
-        <InfoRow label="First Name" value={firstName} />
-        <InfoRow label="Last Name" value={lastName} />
-        <InfoRow label="City" value={city} />
-        {/* You will need to format the string "nnnnnnn" as "nn-nn-nn-n" */}
-        <InfoRow label="Phone" value={"12-34-56-7"} />
-      </div>
-    </>
-  );
-};
+
+export default ProfileInformation;

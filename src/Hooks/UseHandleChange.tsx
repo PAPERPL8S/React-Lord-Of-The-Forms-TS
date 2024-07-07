@@ -1,40 +1,19 @@
 import { useRef } from "react";
+import { UserData } from "../utils/types";
 
-export const useHandleChange = (setFormData: (callback: any) => void) => {
-  const sectionRefs = [
+const useHandleChange = (
+  setFormData: React.Dispatch<React.SetStateAction<UserData>>,
+) => {
+  const sectionRefs = Array.from({ length: 8 }, () =>
     useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-  ];
+  );
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    sectionIndex: number,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prevFormData: any) => {
-      const updatedFormData = { ...prevFormData };
-      updatedFormData[name] = value;
-
-      if (value.length === 80 && sectionIndex < 3) {
-        const nextSectionIndex = sectionIndex + 1;
-        const nextSectionRef = sectionRefs[nextSectionIndex];
-        nextSectionRef.current?.focus();
-      }
-
-      if (value === "" && sectionIndex > 0) {
-        const prevSectionIndex = sectionIndex - 1;
-        const prevSectionRef = sectionRefs[prevSectionIndex];
-        prevSectionRef.current?.focus();
-      }
-
-      return updatedFormData;
-    });
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
   };
 
   const handlePhoneChange = (
@@ -42,16 +21,15 @@ export const useHandleChange = (setFormData: (callback: any) => void) => {
     index: number,
   ) => {
     const { value } = e.target;
-    setFormData((prevFormData: any) => {
+    setFormData((prevFormData) => {
       const phone = [...prevFormData.phone];
       if (
         /^\d*$/.test(value) &&
-        (index < 3 ? value.length <= 2 : value.length <= 4)
+        (index < 3 ? value.length <= 2 : value.length <= 1)
       ) {
         phone[index] = value;
-        const updatedFormData = { ...prevFormData, phone };
 
-        if (value.length === (index < 3 ? 2 : 4) && index < 3) {
+        if (value.length === (index < 3 ? 2 : 1) && index < 3) {
           const nextIndex = index + 1;
           sectionRefs[nextIndex + 4].current?.focus();
         }
@@ -61,12 +39,13 @@ export const useHandleChange = (setFormData: (callback: any) => void) => {
           sectionRefs[prevIndex + 4].current?.focus();
         }
 
-        return updatedFormData;
+        return { ...prevFormData, phone };
       }
-
       return prevFormData;
     });
   };
 
   return { handleChange, handlePhoneChange, sectionRefs };
 };
+
+export default useHandleChange;

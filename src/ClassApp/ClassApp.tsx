@@ -1,30 +1,38 @@
 import { Component } from "react";
-import { ClassForm } from "./ClassForm";
-import { UserInformation } from "../types";
-import { ProfileInformation } from "../ProfileInformation";
-type State = { userInformation: UserInformation | null };
+import ClassForm from "./ClassForm";
+import { UserData } from "../utils/types";
+import ProfileInformation from "../ProfileInformation";
 
-const defaultUser: UserInformation = {
-  email: "default@default.com",
-  firstName: "Default",
-  lastName: "Default",
-  phone: "1234567",
-  city: "Hobbiton",
+interface ClassAppState {
+  userData: UserData;
+  submitted: boolean;
+}
+
+const defaultUser: UserData = {
+  email: "",
+  firstName: "",
+  lastName: "",
+  phone: ["", "", "", ""],
+  city: "",
 };
 
-export class ClassApp extends Component<Record<string, never>, State> {
+export class ClassApp extends Component<{}, ClassAppState> {
+  state: ClassAppState = {
+    userData: defaultUser,
+    submitted: false,
+  };
+
+  handleFormSubmit = (formData: UserData) => {
+    this.setState({ userData: formData, submitted: true });
+  };
+
   render() {
+    const { userData, submitted } = this.state;
     return (
       <>
         <h2>Class</h2>
-        <ProfileInformation
-          userData={
-            // toggle the following lines to change
-            // null
-            defaultUser
-          }
-        />
-        <ClassForm />
+        <ProfileInformation userData={userData} submitted={submitted} />
+        <ClassForm userData={defaultUser} onSubmit={this.handleFormSubmit} />
       </>
     );
   }

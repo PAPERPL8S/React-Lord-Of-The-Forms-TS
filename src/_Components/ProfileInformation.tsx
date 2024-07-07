@@ -1,46 +1,45 @@
-import { formatPhoneNumber } from "../utils/transformations";
+import React from "react";
+import {
+  capitalize,
+  ensureArray,
+  formatPhoneNumber,
+} from "../utils/transformations";
+import { UserData } from "../utils/types";
 
-export const InfoRow = ({ label, value }: { label: string, value: string }) => {
-  return (
-    <div>
-      <span className="label">
-        <b>{label}:</b>
-      </span>
-      <span>{value}</span>
-    </div>
-  );
-};
+interface ProfileInformationProps {
+  userData: UserData | null;
+  submitted: boolean;
+}
 
-export const ProfileInformation = ({ userData }: { userData: any }) => {
-  if (!userData) {
+const ProfileInformation: React.FC<ProfileInformationProps> = ({
+  userData,
+  submitted,
+}) => {
+  if (!submitted) {
     return (
-      <>
-        <u>
-          <h3>Your Submitted User Information</h3>
-        </u>
-        <div className="user-info">
-          <div>No information provided</div>
-        </div>
-      </>
+      <div className="no-info">
+        <p>No information provided</p>
+      </div>
     );
   }
 
-  const { email, firstName, lastName, city, phone } = userData;
-  const formattedPhone = formatPhoneNumber(phone);
+  if (!userData) {
+    return null;
+  }
+
+  const phoneArray = ensureArray(userData.phone);
+  const phoneString = phoneArray.join("");
+  const formattedPhone = formatPhoneNumber(phoneString);
 
   return (
-    <>
-      <u>
-        <h3>Your Submitted User Information</h3>
-      </u>
-      <div className="user-info">
-        <InfoRow label="Email" value={email} />
-        <InfoRow label="First Name" value={firstName} />
-        <InfoRow label="Last Name" value={lastName} />
-        <InfoRow label="City" value={city} />
-        <InfoRow label="Phone" value={formattedPhone} />
-      </div>
-    </>
+    <div className="profile-info-container">
+      <h3 className="profile-info-title">Your Submitted User Information</h3>
+      <p>First Name: {capitalize(userData.firstName)}</p>
+      <p>Last Name: {capitalize(userData.lastName ?? "")}</p>
+      <p>Email: {userData.email}</p>
+      <p>City: {capitalize(userData.city)}</p>
+      <p>Phone: {formattedPhone}</p>
+    </div>
   );
 };
 

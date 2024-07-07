@@ -1,9 +1,13 @@
-export const ErrorMessage = ({
-  message,
-  show,
-}: {
+import React from "react";
+
+interface ErrorMessageProps {
   message: string;
   show: boolean;
-}) => {
-  return show ? <div className="error-message">{message}</div> : <div></div>;
+}
+
+const ErrorMessage: React.FC<ErrorMessageProps> = ({ message, show }) => {
+  if (!show) return null;
+  return <div className="error-message">{message}</div>;
 };
+
+export default ErrorMessage;

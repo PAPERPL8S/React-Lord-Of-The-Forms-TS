@@ -1,14 +1,16 @@
-export function isEmailValid(emailAddress: string) {
+export const isEmailValid = (email: string): boolean => {
   const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-  return !!emailAddress.match(regex);
-}
+  return regex.test(email);
+};
 
-export function isCityValid(city: string) {
-  const regex = /^[a-zA-Z\s]*$/;
-  return !!city.match(regex);
-}
+export const isCityValid = (city: string, allCities: string[]): boolean => {
+  return allCities.some((c) => c.toLowerCase() === city.toLowerCase());
+};
 
-export function isPhoneValid(phone: string) {
-  const regex = /^[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]$/;
-  return !!phone.match(regex);
-}
+export const isPhoneValid = (phone: string): boolean => {
+  return /^\d{7}$/.test(phone);
+};
+
+export const isNameValid = (name: string): boolean => {
+  return name.length >= 2 && /^[a-zA-Z\s]*$/.test(name);
+};

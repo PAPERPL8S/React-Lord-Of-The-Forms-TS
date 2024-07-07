@@ -1,10 +1,11 @@
+import React from "react";
 import FunctionalApp from "./FunctionalApp/FunctionalApp";
 import { ClassApp } from "./ClassApp/ClassApp";
-import { allCities } from "./utils/all-cities.js";
+import { allCities } from "./utils/all-cities";
 
 function App() {
   return (
-    <>
+    <React.Fragment>
       <div className="all-container">
         <u>
           <h1>Lord of the Forms</h1>
@@ -22,10 +23,10 @@ function App() {
       </div>
       <datalist id="cities">
         {allCities.map((city) => (
-          <option key={city}>{city}</option>
+          <option key={city} value={city} />
         ))}
       </datalist>
-    </>
+    </React.Fragment>
   );
 }
 
