@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import "../index.css";
 import ErrorMessage from "../ErrorMessage";
-import ClassTextInput from "../_Components/ClassTextInput";
+import ClassInputField from "../_Components/ClassInputField";
 import ClassPhoneInput from "../Hooks/ClassPhoneInput";
 import { validationRules } from "../utils/ValidationRules";
 import { initialFormDataFn } from "../utils/InitialFormData";
@@ -115,7 +115,7 @@ class ClassForm extends Component<ClassFormProps, ClassFormState> {
         <u>
           <h3>User Information Form</h3>
         </u>
-        <ClassTextInput
+        <ClassInputField
           ref={React.createRef<HTMLInputElement>()}
           label="First Name:"
           name="firstName"
@@ -128,11 +128,11 @@ class ClassForm extends Component<ClassFormProps, ClassFormState> {
           <ErrorMessage message={errors.firstName} show={true} />
         )}
 
-        <ClassTextInput
+        <ClassInputField
           label="Last Name:"
           name="lastName"
           placeholder="Baggins"
-          value={formData.lastName}
+          value={formData.lastName ?? ""}
           onChange={this.handleChange}
           id="lastName"
         />
@@ -140,11 +140,11 @@ class ClassForm extends Component<ClassFormProps, ClassFormState> {
           <ErrorMessage message={errors.lastName} show={true} />
         )}
 
-        <ClassTextInput
+        <ClassInputField
           label="Email:"
           name="email"
           placeholder="bilbo-baggins@adventurehobbits.net"
-          value={formData.email}
+          value={formData.email ?? ""}
           onChange={this.handleChange}
           id="email"
         />
@@ -152,11 +152,11 @@ class ClassForm extends Component<ClassFormProps, ClassFormState> {
           <ErrorMessage message={errors.email} show={true} />
         )}
 
-        <ClassTextInput
+        <ClassInputField
           label="City:"
           name="city"
           placeholder="Hobbiton"
-          value={formData.city}
+          value={formData.city ?? ""}
           onChange={this.handleChange}
           id="city"
           isSelect={true}
