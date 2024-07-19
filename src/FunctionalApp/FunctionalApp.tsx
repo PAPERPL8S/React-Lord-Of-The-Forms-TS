@@ -7,7 +7,7 @@ interface UserData {
   email: string;
   firstName: string;
   lastName: string;
-  phone: string[];
+  phone: string | string[];
   city: string;
 }
 

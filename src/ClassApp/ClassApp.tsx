@@ -4,7 +4,7 @@ import { UserData } from "../utils/types";
 import ProfileInformation from "../ProfileInformation";
 
 interface ClassAppState {
-  userData: UserData;
+  userData: UserData | null;
   submitted: boolean;
 }
 
@@ -16,9 +16,9 @@ const defaultUser: UserData = {
   city: "",
 };
 
-export class ClassApp extends Component<{}, ClassAppState> {
+class ClassApp extends Component<{}, ClassAppState> {
   state: ClassAppState = {
-    userData: defaultUser,
+    userData: null,
     submitted: false,
   };
 
@@ -37,3 +37,5 @@ export class ClassApp extends Component<{}, ClassAppState> {
     );
   }
 }
+
+export default ClassApp;

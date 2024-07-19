@@ -1,6 +1,6 @@
-import React from "react";
+import React, { forwardRef } from "react";
 
-interface FunctionalTextInputProps {
+interface ClassTextInputProps {
   label: string;
   name: string;
   id: string;
@@ -9,17 +9,24 @@ interface FunctionalTextInputProps {
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => void;
-  ref: React.RefObject<HTMLInputElement>;
   isSelect?: boolean;
   options?: string[];
+  className?: string;
 }
 
-const FunctionalTextInput = React.forwardRef<
-  HTMLInputElement,
-  FunctionalTextInputProps
->(
+const ClassTextInput = forwardRef<HTMLInputElement, ClassTextInputProps>(
   (
-    { label, name, id, placeholder, value, onChange, isSelect, options },
+    {
+      label,
+      name,
+      id,
+      placeholder,
+      value,
+      onChange,
+      isSelect,
+      options,
+      className,
+    },
     ref,
   ) => (
     <div className="input-wrap">
@@ -30,8 +37,7 @@ const FunctionalTextInput = React.forwardRef<
           name={name}
           value={value}
           onChange={onChange}
-          ref={ref as any}
-          className="text-input">
+          className={className}>
           <option value="" disabled hidden>
             {placeholder}
           </option>
@@ -50,11 +56,11 @@ const FunctionalTextInput = React.forwardRef<
           value={value}
           onChange={onChange}
           ref={ref}
-          className="text-input"
+          className={className}
         />
       )}
     </div>
   ),
 );
 
-export default FunctionalTextInput;
+export default ClassTextInput;

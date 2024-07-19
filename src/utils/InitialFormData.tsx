@@ -1,4 +1,4 @@
-import { UserData } from "../utils/types";
+import { UserData } from "./types";
 
 export const ensureArray = (
   phone: string[] | string | null | undefined,

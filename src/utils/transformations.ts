@@ -1,4 +1,4 @@
-import { UserData } from "../utils/types";
+import { UserData } from "./types";
 
 export const capitalize = (str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();

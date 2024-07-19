@@ -1,12 +1,18 @@
+import { allCities } from "./all-cities";
 import {
   isEmailValid,
   isCityValid,
   isPhoneValid,
   isNameValid,
-} from "../utils/validations";
-import { allCities } from "./all-cities";
+} from "./validations";
 
-export const validationRules: ValidationRule = [
+export interface ValidationRule {
+  field: string;
+  validate: (value: string) => boolean;
+  errorMessage: string;
+}
+
+export const validationRules: ValidationRule[] = [
   {
     field: "firstName",
     validate: isNameValid,

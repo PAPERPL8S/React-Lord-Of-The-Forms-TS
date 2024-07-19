@@ -1,11 +1,10 @@
-import React from "react";
 import FunctionalApp from "./FunctionalApp/FunctionalApp";
-import { ClassApp } from "./ClassApp/ClassApp";
+import ClassApp from "./ClassApp/ClassApp";
 import { allCities } from "./utils/all-cities";
 
 function App() {
   return (
-    <React.Fragment>
+    <>
       <div className="all-container">
         <u>
           <h1>Lord of the Forms</h1>
@@ -26,7 +25,7 @@ function App() {
           <option key={city} value={city} />
         ))}
       </datalist>
-    </React.Fragment>
+    </>
   );
 }
 
