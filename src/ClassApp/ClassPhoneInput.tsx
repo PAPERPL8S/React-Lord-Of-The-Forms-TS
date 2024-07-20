@@ -1,18 +1,18 @@
-import React from "react";
+import React, { useRef } from "react";
 
 interface ClassPhoneInputProps {
   phone: string[];
   onChange: (e: React.ChangeEvent<HTMLInputElement>, index: number) => void;
-  refs: React.RefObject<HTMLInputElement>[];
   placeholders: string[];
 }
 
 const ClassPhoneInput: React.FC<ClassPhoneInputProps> = ({
   phone,
   onChange,
-  refs,
   placeholders,
 }) => {
+  const inputRefs = useRef<HTMLInputElement[]>([]);
+
   return (
     <div className="phone-inputs">
       {phone.map((value, index) => (
@@ -24,12 +24,12 @@ const ClassPhoneInput: React.FC<ClassPhoneInputProps> = ({
               onChange(e, index);
               if (
                 e.target.value.length === placeholders[index].length &&
-                refs[index + 1]
+                inputRefs.current[index + 1]
               ) {
-                refs[index + 1].current?.focus();
+                inputRefs.current[index + 1].focus();
               }
             }}
-            ref={refs[index]}
+            ref={(el) => (inputRefs.current[index] = el!)}
             placeholder={placeholders[index]}
             className="phone-input"
             maxLength={placeholders[index].length}

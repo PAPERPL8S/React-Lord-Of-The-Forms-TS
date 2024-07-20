@@ -1,9 +1,8 @@
-import React, { Component, createRef, RefObject } from "react";
+import React, { Component } from "react";
 import { UserData } from "../utils/types";
 import ErrorMessage from "../ErrorMessage";
 import ClassInputField from "./ClassInputField";
 import ClassPhoneInput from "./ClassPhoneInput";
-import { initialFormDataFn } from "../utils/InitialFormData";
 import { allCities } from "../utils/all-cities";
 import {
   isEmailValid,
@@ -18,32 +17,34 @@ interface ClassFormProps {
 }
 
 interface ClassFormState {
-  formData: UserData;
+  firstName: string;
+  lastName: string;
+  email: string;
+  city: string;
+  phone: string[];
   errors: Record<string, string>;
-  touched: Record<string, boolean>;
   submitted: boolean;
-  phoneRefs: RefObject<HTMLInputElement>[];
 }
 
 class ClassForm extends Component<ClassFormProps, ClassFormState> {
   constructor(props: ClassFormProps) {
     super(props);
 
-    const initialFormData = initialFormDataFn(this.props.userData);
     this.state = {
-      formData: initialFormData,
+      firstName: props.userData.firstName || "",
+      lastName: props.userData.lastName || "",
+      email: props.userData.email || "",
+      city: props.userData.city || "",
+      phone: Array.isArray(props.userData.phone)
+        ? props.userData.phone
+        : ["", "", "", ""],
       errors: {},
-      touched: {},
       submitted: false,
-      phoneRefs: Array(4)
-        .fill(0)
-        .map(() => createRef<HTMLInputElement>()),
     };
 
     this.handleChange = this.handleChange.bind(this);
     this.handlePhoneChange = this.handlePhoneChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.validateField = this.validateField.bind(this);
   }
 
   validateField(name: string, value: string) {
@@ -90,14 +91,8 @@ class ClassForm extends Component<ClassFormProps, ClassFormState> {
   handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value } = e.target;
     this.setState((prevState) => ({
-      formData: {
-        ...prevState.formData,
-        [name]: value,
-      },
-      touched: {
-        ...prevState.touched,
-        [name]: true,
-      },
+      ...prevState,
+      [name]: value,
     }));
     this.validateField(name, value);
   }
@@ -106,55 +101,40 @@ class ClassForm extends Component<ClassFormProps, ClassFormState> {
     const { value } = e.target;
     if (/^\d*$/.test(value)) {
       this.setState((prevState) => {
-        const phone = [...(prevState.formData.phone as string[])];
+        const phone = [...prevState.phone];
         phone[index] = value;
         const phoneString = phone.join("");
         this.validateField("phone", phoneString);
         return {
-          formData: {
-            ...prevState.formData,
-            phone,
-          },
-          touched: {
-            ...prevState.touched,
-            phone: true,
-          },
+          phone,
         };
       });
-
-      if (value.length === 2 && index < 3) {
-        const nextIndex = index + 1;
-        this.state.phoneRefs[nextIndex].current?.focus();
-      }
     }
   }
 
   validate() {
-    const { formData } = this.state;
+    const { firstName, lastName, email, city, phone } = this.state;
     const errors: Record<string, string> = {};
 
-    if (!isNameValid(formData.firstName)) {
+    if (!isNameValid(firstName)) {
       errors.firstName =
         "First name must be at least 2 characters long and should not contain numbers";
     }
 
-    if (!isNameValid(formData.lastName || "")) {
+    if (!isNameValid(lastName || "")) {
       errors.lastName =
         "Last name must be at least 2 characters long and should not contain numbers";
     }
 
-    if (!isEmailValid(formData.email || "")) {
+    if (!isEmailValid(email || "")) {
       errors.email = "Email is Invalid";
     }
 
-    if (!isCityValid(formData.city, allCities)) {
+    if (!isCityValid(city, allCities)) {
       errors.city = "City is Invalid";
     }
 
-    if (
-      Array.isArray(formData.phone) &&
-      !isPhoneValid(formData.phone.join(""))
-    ) {
+    if (!isPhoneValid(phone.join(""))) {
       errors.phone = "Invalid Phone Number";
     }
 
@@ -166,12 +146,17 @@ class ClassForm extends Component<ClassFormProps, ClassFormState> {
     e.preventDefault();
     this.setState({ submitted: true });
     if (this.validate()) {
-      this.props.onSubmit(this.state.formData);
+      const { firstName, lastName, email, city, phone } = this.state;
+      const formData: UserData = { firstName, lastName, email, city, phone };
+      this.props.onSubmit(formData);
       alert("Form submitted successfully!");
       this.setState({
-        formData: initialFormDataFn({}),
+        firstName: "",
+        lastName: "",
+        email: "",
+        city: "",
+        phone: ["", "", "", ""],
         errors: {},
-        touched: {},
         submitted: false,
       });
     } else {
@@ -180,7 +165,8 @@ class ClassForm extends Component<ClassFormProps, ClassFormState> {
   }
 
   render() {
-    const { formData, errors, touched } = this.state;
+    const { firstName, lastName, email, city, phone, errors, submitted } =
+      this.state;
     return (
       <div>
         <form onSubmit={this.handleSubmit} className="user-info-form">
@@ -192,14 +178,15 @@ class ClassForm extends Component<ClassFormProps, ClassFormState> {
               label="First Name:"
               name="firstName"
               placeholder="Bilbo"
-              value={formData.firstName}
+              value={firstName}
               onChange={this.handleChange}
-              onBlur={() => this.validateField("firstName", formData.firstName)}
+              onBlur={() => this.validateField("firstName", firstName)}
               id="firstName"
             />
-            {touched.firstName && errors.firstName && (
-              <ErrorMessage message={errors.firstName} show={true} />
-            )}
+            <ErrorMessage
+              message={errors.firstName}
+              show={submitted && !!errors.firstName}
+            />
           </div>
 
           <div className="input-wrap">
@@ -207,14 +194,15 @@ class ClassForm extends Component<ClassFormProps, ClassFormState> {
               label="Last Name:"
               name="lastName"
               placeholder="Baggins"
-              value={formData.lastName ?? ""}
+              value={lastName}
               onChange={this.handleChange}
-              onBlur={() => this.validateField("lastName", formData.lastName)}
+              onBlur={() => this.validateField("lastName", lastName)}
               id="lastName"
             />
-            {touched.lastName && errors.lastName && (
-              <ErrorMessage message={errors.lastName} show={true} />
-            )}
+            <ErrorMessage
+              message={errors.lastName}
+              show={submitted && !!errors.lastName}
+            />
           </div>
 
           <div className="input-wrap">
@@ -222,14 +210,15 @@ class ClassForm extends Component<ClassFormProps, ClassFormState> {
               label="Email:"
               name="email"
               placeholder="bilbo-baggins@adventurehobbits.net"
-              value={formData.email ?? ""}
+              value={email}
               onChange={this.handleChange}
-              onBlur={() => this.validateField("email", formData.email)}
+              onBlur={() => this.validateField("email", email)}
               id="email"
             />
-            {touched.email && errors.email && (
-              <ErrorMessage message={errors.email} show={true} />
-            )}
+            <ErrorMessage
+              message={errors.email}
+              show={submitted && !!errors.email}
+            />
           </div>
 
           <div className="input-wrap">
@@ -237,33 +226,30 @@ class ClassForm extends Component<ClassFormProps, ClassFormState> {
               label="City:"
               name="city"
               placeholder="Hobbiton"
-              value={formData.city ?? ""}
+              value={city}
               onChange={this.handleChange}
-              onBlur={() => this.validateField("city", formData.city)}
+              onBlur={() => this.validateField("city", city)}
               id="city"
               isSelect={true}
               options={allCities}
             />
-            {touched.city && errors.city && (
-              <ErrorMessage message={errors.city} show={true} />
-            )}
+            <ErrorMessage
+              message={errors.city}
+              show={submitted && !!errors.city}
+            />
           </div>
 
           <div className="phone-input-container">
             <label className="phone-label">Phone:</label>
             <ClassPhoneInput
-              phone={
-                Array.isArray(formData.phone)
-                  ? formData.phone
-                  : [formData.phone]
-              }
+              phone={phone}
               onChange={this.handlePhoneChange}
-              refs={this.state.phoneRefs}
               placeholders={["55", "55", "55", "5"]}
             />
-            {touched.phone && errors.phone && (
-              <ErrorMessage message={errors.phone} show={true} />
-            )}
+            <ErrorMessage
+              message={errors.phone}
+              show={submitted && !!errors.phone}
+            />
           </div>
 
           <input type="submit" value="Submit" />

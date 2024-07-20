@@ -3,7 +3,6 @@ import "../index.css";
 import ErrorMessage from "../ErrorMessage";
 import FunctionalTextInput from "../FunctionalApp/FunctionalTextInput";
 import FunctionalPhoneInput from "../FunctionalApp/FunctionalPhoneInput";
-import { initialFormDataFn } from "../utils/InitialFormData";
 import { UserData } from "../utils/types";
 import { allCities } from "../utils/all-cities";
 import {
@@ -22,61 +21,35 @@ const FunctionalForm: React.FC<FunctionalFormProps> = ({
   userData,
   onSubmit,
 }) => {
-  const initialFormData = initialFormDataFn(userData);
-  const [formData, setFormData] = useState<UserData>(initialFormData);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const [_submitted, setSubmitted] = useState(false);
-
-  const validateField = (name: string, value: string) => {
-    let error = "";
-
-    if (name === "firstName" || name === "lastName") {
-      if (!isNameValid(value)) {
-        error =
-          name === "firstName"
-            ? "First name must be at least 2 characters long and should not contain numbers"
-            : "Last name must be at least 2 characters long and should not contain numbers";
-      }
-    }
-
-    if (name === "email") {
-      if (!isEmailValid(value)) {
-        error = "Email is Invalid";
-      }
-    }
-
-    if (name === "city") {
-      if (!isCityValid(value, allCities)) {
-        error = "City is Invalid";
-      }
-    }
-
-    if (name === "phone") {
-      if (!isPhoneValid(value)) {
-        error = "Invalid Phone Number";
-      }
-    }
-
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [name]: error,
-    }));
-  };
+  const [firstName, setFirstName] = useState<string>(userData.firstName || "");
+  const [lastName, setLastName] = useState<string>(userData.lastName || "");
+  const [email, setEmail] = useState<string>(userData.email || "");
+  const [city, setCity] = useState<string>(userData.city || "");
+  const [phone, setPhone] = useState<string[]>(
+    Array.isArray(userData.phone) ? userData.phone : ["", "", "", ""],
+  );
+  const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value,
-    }));
-    setTouched((prevTouched) => ({
-      ...prevTouched,
-      [name]: true,
-    }));
-    validateField(name, value);
+    switch (name) {
+      case "firstName":
+        setFirstName(value);
+        break;
+      case "lastName":
+        setLastName(value);
+        break;
+      case "email":
+        setEmail(value);
+        break;
+      case "city":
+        setCity(value);
+        break;
+      default:
+        break;
+    }
   };
 
   const handlePhoneChange = (
@@ -84,66 +57,76 @@ const FunctionalForm: React.FC<FunctionalFormProps> = ({
     index: number,
   ) => {
     const { value } = e.target;
-    setFormData((prevFormData) => {
-      const phone = [...(prevFormData.phone as string[])];
-      phone[index] = value;
-      const phoneString = phone.join("");
-      validateField("phone", phoneString);
-      return {
-        ...prevFormData,
-        phone,
-      };
+    setPhone((prevPhone) => {
+      const newPhone = [...prevPhone];
+      newPhone[index] = value;
+      return newPhone;
     });
-    setTouched((prevTouched) => ({
-      ...prevTouched,
-      phone: true,
-    }));
   };
 
   const validate = () => {
-    const errors: Record<string, string> = {};
+    let isValid = true;
 
-    if (!isNameValid(formData.firstName)) {
-      errors.firstName =
-        "First name must be at least 2 characters long and should not contain numbers";
+    if (!isNameValid(firstName)) {
+      isValid = false;
     }
 
-    if (!isNameValid(formData.lastName || "")) {
-      errors.lastName =
-        "Last name must be at least 2 characters long and should not contain numbers";
+    if (!isNameValid(lastName || "")) {
+      isValid = false;
     }
 
-    if (!isEmailValid(formData.email || "")) {
-      errors.email = "Email is Invalid";
+    if (!isEmailValid(email || "")) {
+      isValid = false;
     }
 
-    if (!isCityValid(formData.city, allCities)) {
-      errors.city = "City is Invalid";
+    if (!isCityValid(city, allCities)) {
+      isValid = false;
     }
 
-    if (
-      Array.isArray(formData.phone) &&
-      !isPhoneValid(formData.phone.join(""))
-    ) {
-      errors.phone = "Invalid Phone Number";
+    if (!isPhoneValid(phone.join(""))) {
+      isValid = false;
     }
 
-    setErrors(errors);
-    return Object.keys(errors).length === 0;
+    return isValid;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
     if (validate()) {
-      onSubmit(formData);
+      onSubmit({ firstName, lastName, email, city, phone });
       alert("Form submitted successfully!");
-      setFormData(initialFormDataFn({}));
-      setErrors({});
-      setTouched({});
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setCity("");
+      setPhone(["", "", "", ""]);
       setSubmitted(false);
     } else {
       alert("Bad Inputs");
+    }
+  };
+
+  const getErrorMessage = (field: string): string => {
+    if (!submitted) return "";
+
+    switch (field) {
+      case "firstName":
+        return !isNameValid(firstName)
+          ? "First name must be at least 2 characters long and should not contain numbers"
+          : "";
+      case "lastName":
+        return !isNameValid(lastName || "")
+          ? "Last name must be at least 2 characters long and should not contain numbers"
+          : "";
+      case "email":
+        return !isEmailValid(email || "") ? "Email is Invalid" : "";
+      case "city":
+        return !isCityValid(city, allCities) ? "City is Invalid" : "";
+      case "phone":
+        return !isPhoneValid(phone.join("")) ? "Invalid Phone Number" : "";
+      default:
+        return "";
     }
   };
 
@@ -158,15 +141,16 @@ const FunctionalForm: React.FC<FunctionalFormProps> = ({
             label="First Name:"
             name="firstName"
             placeholder="Bilbo"
-            value={formData.firstName}
+            value={firstName}
             onChange={handleChange}
             id="firstName"
             ref={React.createRef<HTMLInputElement>()}
             className="text-input"
           />
-          {touched.firstName && errors.firstName && (
-            <ErrorMessage message={errors.firstName} show={true} />
-          )}
+          <ErrorMessage
+            message={getErrorMessage("firstName")}
+            show={submitted && getErrorMessage("firstName") !== ""}
+          />
         </div>
 
         <div className="input-wrap">
@@ -174,15 +158,16 @@ const FunctionalForm: React.FC<FunctionalFormProps> = ({
             label="Last Name:"
             name="lastName"
             placeholder="Baggins"
-            value={formData.lastName ?? ""}
+            value={lastName ?? ""}
             onChange={handleChange}
             id="lastName"
             ref={React.createRef<HTMLInputElement>()}
             className="text-input"
           />
-          {touched.lastName && errors.lastName && (
-            <ErrorMessage message={errors.lastName} show={true} />
-          )}
+          <ErrorMessage
+            message={getErrorMessage("lastName")}
+            show={submitted && getErrorMessage("lastName") !== ""}
+          />
         </div>
 
         <div className="input-wrap">
@@ -190,15 +175,16 @@ const FunctionalForm: React.FC<FunctionalFormProps> = ({
             label="Email:"
             name="email"
             placeholder="bilbo-baggins@adventurehobbits.net"
-            value={formData.email ?? ""}
+            value={email ?? ""}
             onChange={handleChange}
             id="email"
             ref={React.createRef<HTMLInputElement>()}
             className="text-input"
           />
-          {touched.email && errors.email && (
-            <ErrorMessage message={errors.email} show={true} />
-          )}
+          <ErrorMessage
+            message={getErrorMessage("email")}
+            show={submitted && getErrorMessage("email") !== ""}
+          />
         </div>
 
         <div className="input-wrap">
@@ -206,7 +192,7 @@ const FunctionalForm: React.FC<FunctionalFormProps> = ({
             label="City:"
             name="city"
             placeholder="Hobbiton"
-            value={formData.city ?? ""}
+            value={city ?? ""}
             onChange={handleChange}
             id="city"
             isSelect={true}
@@ -214,28 +200,23 @@ const FunctionalForm: React.FC<FunctionalFormProps> = ({
             ref={React.createRef<HTMLInputElement>()}
             className="text-input"
           />
-          {touched.city && errors.city && (
-            <ErrorMessage message={errors.city} show={true} />
-          )}
+          <ErrorMessage
+            message={getErrorMessage("city")}
+            show={submitted && getErrorMessage("city") !== ""}
+          />
         </div>
 
         <div className="phone-input-container">
           <label className="phone-label">Phone:</label>
           <FunctionalPhoneInput
-            phone={
-              Array.isArray(formData.phone) ? formData.phone : [formData.phone]
-            }
+            phone={phone}
             onChange={handlePhoneChange}
-            refs={
-              Array.isArray(formData.phone)
-                ? formData.phone.map(() => React.createRef<HTMLInputElement>())
-                : []
-            }
             placeholders={["55", "55", "55", "5"]}
           />
-          {touched.phone && errors.phone && (
-            <ErrorMessage message={errors.phone} show={true} />
-          )}
+          <ErrorMessage
+            message={getErrorMessage("phone")}
+            show={submitted && getErrorMessage("phone") !== ""}
+          />
         </div>
 
         <input type="submit" value="Submit" />

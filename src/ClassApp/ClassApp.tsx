@@ -4,7 +4,7 @@ import { UserData } from "../utils/types";
 import ProfileInformation from "../ProfileInformation";
 
 interface ClassAppState {
-  userData: UserData | null;
+  userData: UserData;
   submitted: boolean;
 }
 
@@ -18,7 +18,7 @@ const defaultUser: UserData = {
 
 class ClassApp extends Component<{}, ClassAppState> {
   state: ClassAppState = {
-    userData: null,
+    userData: defaultUser,
     submitted: false,
   };
 
@@ -29,11 +29,11 @@ class ClassApp extends Component<{}, ClassAppState> {
   render() {
     const { userData, submitted } = this.state;
     return (
-      <>
+      <div className="class-app">
         <h2>Class</h2>
         <ProfileInformation userData={userData} submitted={submitted} />
-        <ClassForm userData={defaultUser} onSubmit={this.handleFormSubmit} />
-      </>
+        <ClassForm userData={userData} onSubmit={this.handleFormSubmit} />
+      </div>
     );
   }
 }

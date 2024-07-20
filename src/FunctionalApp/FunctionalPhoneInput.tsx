@@ -1,56 +1,40 @@
-import React, { useEffect } from "react";
+import React from "react";
 
 interface FunctionalPhoneInputProps {
   phone: string[];
   onChange: (e: React.ChangeEvent<HTMLInputElement>, index: number) => void;
-  refs: React.RefObject<HTMLInputElement>[];
-  placeholders?: string[];
+  placeholders: string[];
 }
 
 const FunctionalPhoneInput: React.FC<FunctionalPhoneInputProps> = ({
   phone,
   onChange,
-  refs,
-  placeholders = ["55", "55", "55", "5"],
+  placeholders,
 }) => {
-  const phoneValues = phone.map((value) => value || "");
-
-  useEffect(() => {
-    refs.forEach((ref, index) => {
-      if (ref.current) {
-        ref.current.maxLength = index < 3 ? 2 : 1;
-      }
-    });
-  }, [refs]);
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    index: number,
-  ) => {
-    const { value } = e.target;
-    if (/^\d*$/.test(value)) {
-      onChange(e, index);
-      if (index < 3 && value.length === 2) {
-        refs[index + 1].current?.focus();
-      } else if (index === 3 && value.length === 1) {
-        refs[index + 1]?.current?.blur();
-      }
-    }
-  };
+  const phoneRefs = phone.map(() => React.createRef<HTMLInputElement>());
 
   return (
     <div className="phone-inputs">
-      {phoneValues.map((value, index) => (
+      {phone.map((value, index) => (
         <React.Fragment key={index}>
           <input
             type="text"
             value={value}
-            onChange={(e) => handleInputChange(e, index)}
-            ref={refs[index]}
-            className="phone-input"
+            onChange={(e) => {
+              onChange(e, index);
+              if (
+                e.target.value.length === placeholders[index].length &&
+                phoneRefs[index + 1]
+              ) {
+                phoneRefs[index + 1].current?.focus();
+              }
+            }}
+            ref={phoneRefs[index]}
             placeholder={placeholders[index]}
+            className="phone-input"
+            maxLength={placeholders[index].length}
           />
-          {index < phoneValues.length - 1 && <span className="dash">-</span>}
+          {index < phone.length - 1 && <span className="dash">-</span>}
         </React.Fragment>
       ))}
     </div>
